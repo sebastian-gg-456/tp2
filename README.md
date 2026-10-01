@@ -4,7 +4,7 @@ titulo: Laboratorio Guardia de Sigilo
 tipo: indice
 audiencia: estudiante
 acceso: publico
-version: 3
+version: 4
 ---
 
 # Laboratorio Guardia de Sigilo
@@ -13,7 +13,9 @@ Proyecto canónico de PIAPC 2026 para aplicar desarrollo agéntico e inteligenci
 
 ## Estado
 
-H0 a H3 implementados: escenario base, repositorio preparado para agentes, navegación BFS/A* y percepción con memoria. La máquina de estados se incorpora en H4.
+H0 a H4 implementados, más los diez upgrades de comportamiento: máquina de
+estados del guardia, medidor de alerta, cobertura, distractores, escape de
+último momento y puertas. 219 pruebas automatizadas en verde.
 
 ## Ejecución
 
@@ -33,10 +35,15 @@ npm run validate
 En la escena:
 
 - WASD o flechas: mover al jugador.
-- Clic: elegir un destino para el guardia.
+- Clic en una celda: elegir destino para el guardia.
+- Clic en una puerta: abrirla o cerrarla.
+- 1, 2 o 3: lanzar una piedra hacia el cursor (3 cargas, se recargan).
+- Q: emitir un ruido desde el jugador.
 - Espacio: alternar BFS y A*.
-- Q: emitir un sonido desde el jugador.
 - R: reiniciar el escenario.
+
+La persiana no es un control: se abre sola cuando el guardia entra en
+persecución y se mantiene abierta mientras busca.
 
 ## Propósito
 
@@ -67,6 +74,11 @@ El proyecto no busca producir un videojuego comercial. Es un entorno de experime
 - [H3: percepción y movimiento](docs/h3-percepcion-movimiento.md)
 - [Intervención H3](docs/evidencias/h3-intervencion.md)
 - [Validación H3](docs/evidencias/h3-validacion.md)
+- [GDD](docs/GDD.md)
+- [Cómo funciona](docs/como-funciona.md)
+- [H4: máquina de estados](docs/h4-maquina-estados.md)
+- [Validación H4 y upgrades](docs/evidencias/h4-validacion.md)
+- [Upgrades 01 a 10](docs/upgrades/README.md)
 
 ## Tecnología de referencia
 

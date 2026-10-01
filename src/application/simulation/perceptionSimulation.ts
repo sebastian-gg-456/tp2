@@ -12,15 +12,31 @@ import {
   type VisionResult,
 } from "../../domain/perception/perception";
 
+/**
+ * Upgrade 7 - La percepcion admite varios sonidos simultaneos porque el
+ * jugador puede lanzar varios distractores. El log queda acotado a los
+ * eventos mas recientes y la memoria prioriza vision, como en H3.
+ */
+
+export const MAX_SOUND_EVENTS = 4;
+
 export interface PerceptionSimulationState {
   readonly memory: PerceptionMemory;
-  readonly soundEvent: SoundEvent | null;
+  readonly soundEvents: readonly SoundEvent[];
+}
+
+export interface HeardSound {
+  readonly event: SoundEvent;
+  readonly distance: number;
 }
 
 export interface PerceptionFrame {
   readonly state: PerceptionSimulationState;
   readonly vision: VisionResult;
   readonly soundHeard: boolean;
+  readonly heardSounds: readonly HeardSound[];
+  /** Sonido audible mas cercano: el mas informativo para investigar. */
+  readonly closestSound: SoundEvent | null;
 }
 
 export interface PerceptionFrameInput {
@@ -35,14 +51,17 @@ export interface PerceptionFrameInput {
 }
 
 export function initialPerceptionState(): PerceptionSimulationState {
-  return { memory: emptyPerceptionMemory(), soundEvent: null };
+  return { memory: emptyPerceptionMemory(), soundEvents: [] };
 }
 
 export function withSoundEvent(
   state: PerceptionSimulationState,
   soundEvent: SoundEvent,
 ): PerceptionSimulationState {
-  return { ...state, soundEvent };
+  const events = [...state.soundEvents, soundEvent]
+    .sort((left, right) => left.emittedAtMs - right.emittedAtMs)
+    .slice(-MAX_SOUND_EVENTS);
+  return { ...state, soundEvents: events };
 }
 
 export function updatePerceptionSimulation(
@@ -50,21 +69,21 @@ export function updatePerceptionSimulation(
   input: PerceptionFrameInput,
 ): PerceptionFrame {
   let memory = state.memory;
-  let soundEvent = state.soundEvent;
-  let soundHeard = false;
+  const active: SoundEvent[] = [];
+  const heard: HeardSound[] = [];
 
-  if (soundEvent) {
-    const sound = evaluateSound(input.observer, soundEvent, input.timeMs);
-    soundHeard = sound.heard;
-    if (sound.heard) {
+  for (const soundEvent of state.soundEvents) {
+    const result = evaluateSound(input.observer, soundEvent, input.timeMs);
+    if (result.heard) {
+      heard.push({ event: soundEvent, distance: result.distance });
       memory = rememberObservation(memory, {
         source: "sound",
         position: soundEvent.position,
         observedAtMs: input.timeMs,
       });
     }
-    if (!sound.active && input.timeMs > soundEvent.emittedAtMs + soundEvent.durationMs) {
-      soundEvent = null;
+    if (input.timeMs <= soundEvent.emittedAtMs + soundEvent.durationMs) {
+      active.push(soundEvent);
     }
   }
 
@@ -85,9 +104,18 @@ export function updatePerceptionSimulation(
     });
   }
 
+  const closestSound = heard.reduce<HeardSound | null>((best, candidate) => {
+    if (best === null || candidate.distance < best.distance) {
+      return candidate;
+    }
+    return best;
+  }, null)?.event ?? null;
+
   return {
-    state: { memory, soundEvent },
+    state: { memory, soundEvents: active },
     vision,
-    soundHeard,
+    soundHeard: heard.length > 0,
+    heardSounds: heard,
+    closestSound,
   };
 }

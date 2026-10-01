@@ -1,5 +1,6 @@
-import { isWalkable, worldToCell, type GridMap } from "../model/grid";
+﻿import type { GridMap } from "../model/grid";
 import { assertFiniteVector, distanceBetween, normalized, type Vector2 } from "../model/vector";
+import { lineIsOccluded } from "./occlusion";
 
 export type VisionReason = "visible" | "out-of-range" | "outside-cone" | "occluded" | "invalid-facing";
 
@@ -101,53 +102,3 @@ export function evaluateSound(
   return { heard: active && distance <= event.radius, active, distance };
 }
 
-function lineIsOccluded(
-  map: GridMap,
-  tileSize: number,
-  from: Vector2,
-  to: Vector2,
-): boolean {
-  const start = worldToCell(from, tileSize);
-  const end = worldToCell(to, tileSize);
-  if (!isWalkable(map, start) || !isWalkable(map, end)) {
-    return true;
-  }
-  let x = start.x;
-  let y = start.y;
-  const deltaX = to.x - from.x;
-  const deltaY = to.y - from.y;
-  const stepX = Math.sign(deltaX);
-  const stepY = Math.sign(deltaY);
-  const absoluteDeltaX = Math.abs(deltaX);
-  const absoluteDeltaY = Math.abs(deltaY);
-
-  while (x !== end.x || y !== end.y) {
-    const boundaryX = stepX > 0 ? (x + 1) * tileSize : x * tileSize;
-    const boundaryY = stepY > 0 ? (y + 1) * tileSize : y * tileSize;
-    const distanceX = stepX === 0 ? Number.POSITIVE_INFINITY : Math.abs(boundaryX - from.x);
-    const distanceY = stepY === 0 ? Number.POSITIVE_INFINITY : Math.abs(boundaryY - from.y);
-    const crossingX = distanceX * absoluteDeltaY;
-    const crossingY = distanceY * absoluteDeltaX;
-
-    if (crossingX === crossingY) {
-      if (
-        !isWalkable(map, { x: x + stepX, y })
-        || !isWalkable(map, { x, y: y + stepY })
-      ) {
-        return true;
-      }
-      x += stepX;
-      y += stepY;
-    } else if (crossingX < crossingY) {
-      x += stepX;
-    } else {
-      y += stepY;
-    }
-
-    if (!isWalkable(map, { x, y })) {
-      return true;
-    }
-  }
-
-  return false;
-}

@@ -4,7 +4,7 @@ titulo: Hitos del laboratorio Guardia de Sigilo
 tipo: referencia
 audiencia: estudiante
 acceso: publico
-version: 3
+version: 4
 ---
 
 # Hitos del laboratorio
@@ -15,7 +15,7 @@ version: 3
 | H1. Repositorio preparado para agentes | Completado |
 | H2. Navegación | Completado |
 | H3. Percepción y movimiento | Completado |
-| H4. Máquina de estados | Pendiente |
+| H4. Máquina de estados | Completado |
 | H5. Comparación | Pendiente |
 | H6. Integración final | Pendiente |
 
@@ -59,10 +59,15 @@ version: 3
 - Registro de transiciones.
 - Pruebas de secuencias.
 
+Estado: completado el 30 de septiembre de 2026. Contrato de estados y
+prioridades en [H4: máquina de estados](h4-maquina-estados.md); comportamiento
+previsto en el [GDD](GDD.md); orden del tick en [cómo funciona](como-funciona.md).
+
 ### H4.1. Patrullar
 
 - Recorrer puntos de patrulla cíclicos mediante rutas válidas.
 - Registrar llegada y selección del siguiente punto.
+- Pausa con barrido direccional de la mirada (upgrade 01).
 
 ### H4.2. Investigar
 
@@ -83,6 +88,14 @@ version: 3
 
 - Tras agotar la búsqueda, volver a un punto de patrulla válido.
 - Recuperarse explícitamente ante un destino inaccesible y registrar la transición.
+
+## Upgrades asociados a H4
+
+Los diez upgrades se construyeron durante H4 y están documentados en
+[docs/upgrades](upgrades/README.md), cada uno con especificación, plan y
+evidencia: patrulla con pausas y mirada, cono de visión, animaciones por
+estado, trazabilidad de navegación, cámara de tensión, cobertura,
+distractores, medidor de alerta, escape de último momento y puertas.
 
 ## H5. Comparación
 
